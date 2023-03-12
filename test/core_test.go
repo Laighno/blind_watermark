@@ -23,14 +23,16 @@ func Test_AddWatermark(t *testing.T) {
 
 	wmImg, _ := blind_watermark.AddWatermark(img, bytes.NewBufferString("不是昨天说的，每个tab分开记录浏览记录，来达到分开去重的效果吗").Bytes())
 
-	t.Log(blind_watermark.ExtractWaterMask(wmImg))
+	b, _ := blind_watermark.ExtractWaterMask(wmImg)
+	t.Log(bytes.NewBuffer(b).String())
 
 	f, err := os.Create("./result.png")
 	png.Encode(f, wmImg)
 }
 
 func Test_ExtractWaterMark(t *testing.T) {
-	imageByte, err := os.ReadFile("./img.png")
+
+	imageByte, err := os.ReadFile("./截屏攻击2.png")
 	if err != nil {
 		t.Log(err)
 		return

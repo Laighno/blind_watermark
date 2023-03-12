@@ -1,9 +1,14 @@
 package blind_watermark
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
+)
+
+const (
+	d = 32
 )
 
 func AddWatermark(img image.Image, wm []byte) (image.Image, error) {
@@ -20,13 +25,29 @@ func AddWatermark(img image.Image, wm []byte) (image.Image, error) {
 		pix[i] = row
 	}
 
-	blocks := SwitchToBlocks(pix)
+	ll, lh, hl, hh := Dwt2(pix)
+
+	blocks := SwitchToBlocks(ll)
 
 	blocks = EmbedWm(blocks, wm)
 
 	//fmt.Println(bytes.NewBuffer(append(bytes.NewBufferString(wm).Bytes(), []byte{0,0}...)).Bytes())
 	//fmt.Println(blocks)
-	pix = RestoreSourceData(blocks)
+	ll = RestoreSourceData(blocks)
+
+	pix = Idwt2(ll, lh, hl, hh)
+
+	for i, _ := range pix {
+		for j, w := range pix[i] {
+			if w > 255 {
+				//fmt.Println(i, j, w)
+				pix[i][j] = 255
+			}
+			if w < 0 {
+				pix[i][j] = 0
+			}
+		}
+	}
 
 	for i := 0; i < RGBAImage.Bounds().Max.X; i++ {
 		for j := 0; j < RGBAImage.Bounds().Max.Y; j++ {
@@ -58,8 +79,12 @@ func ExtractWaterMask(img image.Image) ([]byte, error) {
 		pix[i] = row
 	}
 
-	blocks := SwitchToBlocks(pix)
-	//fmt.Println(blocks)
+	fmt.Println(1)
+	ll, _, _, _ := Dwt2(pix)
+	fmt.Println(1)
+
+	blocks := SwitchToBlocks(ll)
+	fmt.Println(1)
 
 	wm := ExtractWm(blocks)
 
@@ -96,7 +121,7 @@ func EmbedWm(src [][][][]float64, wm []uint8) [][][][]float64 {
 func embedOneBitInBlock(block [][]float64, bit uint8) [][]float64 {
 	//block = Dct2(block)
 
-	block[0][0] = (float64(uint64(block[0][0]/36)) + 1.0/4 + 1.0/2*float64(bit)) * 36
+	block[0][0] = (float64(uint64(block[0][0]/d)) + 1.0/4 + 1.0/2*float64(bit)) * d
 	//fmt.Println(block[0][0], uint64(block[0][0])%36)
 	//block = Idct2(block)
 
@@ -106,7 +131,14 @@ func embedOneBitInBlock(block [][]float64, bit uint8) [][]float64 {
 func extractBitFromBlock(block [][]float64) uint8 {
 	//block = Dct2(block)
 	//fmt.Println(block[0][0], uint64(block[0][0])%36)
-	if uint64(block[0][0])%36 > 18 {
+	//for i:=0;i<stride;i++{
+	//	for j:=0;j<stride;j++{
+	//		if FloatToUint8(block[i][j])%d == d/4|| FloatToUint8(block[i][j])%d==d*3/4{
+	//			return 1
+	//		}
+	//	}
+	//}
+	if uint64(block[0][0])%d > d/2 {
 		return 1
 	}
 	return 0
@@ -127,6 +159,7 @@ func ExtractWm(src [][][][]float64) []uint8 {
 			}
 
 			if phase == 7 {
+				fmt.Println(b)
 				if startCnt >= 4 {
 					wm = append(wm, b)
 					if b == 0 {
