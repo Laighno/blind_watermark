@@ -32,7 +32,7 @@ func Test_AddWatermark(t *testing.T) {
 
 func Test_ExtractWaterMark(t *testing.T) {
 
-	imageByte, err := os.ReadFile("./截屏攻击2.png")
+	imageByte, err := os.ReadFile("./result.png")
 	if err != nil {
 		t.Log(err)
 		return

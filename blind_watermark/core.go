@@ -1,14 +1,13 @@
 package blind_watermark
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 )
 
 const (
-	d = 32
+	d = 16
 )
 
 func AddWatermark(img image.Image, wm []byte) (image.Image, error) {
@@ -79,12 +78,9 @@ func ExtractWaterMask(img image.Image) ([]byte, error) {
 		pix[i] = row
 	}
 
-	fmt.Println(1)
 	ll, _, _, _ := Dwt2(pix)
-	fmt.Println(1)
 
 	blocks := SwitchToBlocks(ll)
-	fmt.Println(1)
 
 	wm := ExtractWm(blocks)
 
@@ -159,7 +155,7 @@ func ExtractWm(src [][][][]float64) []uint8 {
 			}
 
 			if phase == 7 {
-				fmt.Println(b)
+				//fmt.Println(b)
 				if startCnt >= 4 {
 					wm = append(wm, b)
 					if b == 0 {

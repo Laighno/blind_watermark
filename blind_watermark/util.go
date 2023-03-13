@@ -1,9 +1,7 @@
 package blind_watermark
 
-import "fmt"
-
 const (
-	stride = 4
+	stride = 1
 )
 
 // 切分block,二维转四维
@@ -11,10 +9,10 @@ func SwitchToBlocks(src [][]float64) (blocks [][][][]float64) {
 
 	rLen := len(src)
 	cLen := len(src[0])
-	fmt.Println(rLen, cLen)
-	for i := 0; i*stride+stride < rLen; i++ {
+	//fmt.Println(rLen, cLen)
+	for i := 0; i*stride+stride-1 < rLen; i++ {
 		blockRow := make([][][]float64, 0)
-		for j := 0; j*stride+stride < cLen; j++ {
+		for j := 0; j*stride+stride-1 < cLen; j++ {
 			block := [stride][]float64{}
 
 			for m := 0; m < stride; m++ {
@@ -63,6 +61,7 @@ func switchRowAndColumns(data [][]float64) [][]float64 {
 	}
 
 	for i := 0; i < len(data); i++ {
+		//fmt.Println(len(data[i]))
 		for j := 0; j < len(data[i]); j++ {
 			ret[j][i] = data[i][j]
 		}
