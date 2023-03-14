@@ -210,7 +210,7 @@ func extractFromBlock(block [][]float64) (bool,[]uint8) {
 }
 
 func ExtractWm(src [][]float64) ([]uint8,error) {
-	for i := 0; i < len(src); i++ {
+	for i := 0; i < len(src)-stride+1; i++ {
 		startCnt := 0
 		for j := 0; j < len(src[i]); j++ {
 			if uint64(src[i][j])%d > d/2{
