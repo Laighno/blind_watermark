@@ -1,7 +1,7 @@
 package blind_watermark
 
 const (
-	stride = 1
+	stride = 32
 )
 
 // 切分block,二维转四维
